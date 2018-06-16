@@ -54,4 +54,15 @@ public class User implements Serializable {
     public void setLastModified(String lastModified) {
         this.lastModified = lastModified;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", age=" + age +
+                ", sex='" + sex + '\'' +
+                ", lastModified='" + lastModified + '\'' +
+                '}';
+    }
 }
