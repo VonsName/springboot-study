@@ -8,12 +8,16 @@ import org.springframework.cache.annotation.EnableCaching;
 
 /**
  * @author ASUS
+ * springboot 默认支持两种elasticsearch
+ *      1.Jest(); 默认不生效 需要导入io.searchbox.client.JestClient
+ *      2.SpringData ElasticSearch
  */
 @SpringBootApplication
 @MapperScan(value = "com.example.democache.mapper")
-@EnableCaching
+@EnableCaching//自动配置缓存
 //EnableRabbit+@RabbitListener 监听消息
-@EnableRabbit
+@EnableRabbit //自动配置Rabbit
+
 public class DemoCacheApplication {
 
     public static void main(String[] args) {

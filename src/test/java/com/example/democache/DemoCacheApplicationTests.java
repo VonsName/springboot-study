@@ -1,6 +1,11 @@
 package com.example.democache;
 
+import com.example.democache.elk.Article;
 import com.example.democache.redis.User;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
 import org.apache.http.client.utils.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,7 +17,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -38,6 +45,9 @@ public class DemoCacheApplicationTests {
 
     @Autowired
     private AmqpAdmin amqpAdmin;
+
+    @Autowired
+    private JestClient jestClient;
     @Test
     public void contextLoads() {
         redisTemplate.opsForValue().set("user","李四");
@@ -126,5 +136,51 @@ public class DemoCacheApplicationTests {
        //amqpAdmin.deleteQueue("amqpadmin.queue");
         //删除交换器
         amqpAdmin.deleteExchange("amqp.exchange");
+    }
+
+    /**
+     * Jest elasticsearch
+     */
+    @Test
+    public void testElasticSearch(){
+        Article article = new Article();
+        article.setId(1);
+        article.setAuthor("西门庆");
+        article.setName("水浒传");
+
+        //构建一个索引
+        Index index = new Index
+                .Builder(article)
+                .index("article")
+                .type("news")
+                .build();
+        try {
+            jestClient.execute(index);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 测试Jest搜索
+     */
+    @Test
+    public void testJest01(){
+        //language=JSON 使用json查询表达式
+        String json="{\"query\":{\"match\":{\"name\":\"水浒传\"}}}";
+        //构建一个搜索
+        Search search = new Search
+                .Builder(json)
+                .addIndex("article")
+                .addType("news").build();
+        try {
+            //返回一个SearchResult
+            SearchResult result = jestClient.execute(search);
+            //List<SearchResult.Hit<Article, Void>> hits = result.getHits(Article.class);
+            //System.out.println(hits);
+            System.out.println("-------"+result.getJsonString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
