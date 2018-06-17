@@ -1,25 +1,36 @@
 package com.example.democache;
 
 import com.example.democache.elk.Article;
+import com.example.democache.elk.ArticleRepository;
 import com.example.democache.redis.User;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Index;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
 import org.apache.http.client.utils.DateUtils;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -48,6 +59,12 @@ public class DemoCacheApplicationTests {
 
     @Autowired
     private JestClient jestClient;
+
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
+    private JavaMailSenderImpl javaMailSender;
     @Test
     public void contextLoads() {
         redisTemplate.opsForValue().set("user","李四");
@@ -182,5 +199,62 @@ public class DemoCacheApplicationTests {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    /**
+     * 测试集成spring-boot-starter-data-elasticsearch
+     * spring data elasticsearch 	elasticsearch
+     * 3.1.x 	6.2.2
+     * 3.0.x 	5.5.0
+     * 2.1.x 	2.4.0
+     * 2.0.x 	2.2.0
+     * 1.3.x 	1.5.2
+     * 这里使用的spring data elasticsearch 是2.4.6,所以服务端的版本要是2.x.x版本
+     *
+     * https://docs.spring.io/spring-data/elasticsearch/docs/3.0.6.RELEASE/reference/html/
+     */
+    @Test
+    public void  testEs02(){
+        /*Article article = new Article();
+        article.setId(1);
+        article.setName("西游记");
+        article.setAuthor("吴承恩");
+        articleRepository.index(article);*/
+        List<Article> articleList = articleRepository.findArticleByName("西");
+        System.out.println(articleList+"-------------");
+        /*new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.matchAllQuery())
+                .withFilter();*/
+    }
+
+    /**
+     * 测试邮件发送简单消息
+     */
+    @Test
+    public void testMailSend(){
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setSubject("开会啦");
+        simpleMailMessage.setText("测试开会发邮件");
+        simpleMailMessage.setTo("vons0828@163.com");
+        simpleMailMessage.setFrom("894611653@qq.com");
+        javaMailSender.send(simpleMailMessage);
+    }
+
+    /**
+     *  复杂消息
+     * @throws MessagingException
+     */
+    @Test
+    public void testMailSend2() throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        //multipart=true 上传文件
+        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage,true);
+        messageHelper.setSubject("复杂消息+上传附件");
+        //html=true 表示发送Html消息
+        messageHelper.setText("<a href='www.baidu.com'>点击激活帐号</a>",true);
+        messageHelper.setTo("vons0828@163.com");
+        messageHelper.setFrom("894611653@qq.com");
+        messageHelper.addAttachment("1.png",new File("C:\\Users\\ASUS\\Pictures\\Saved Pictures\\1.png"));
+        messageHelper.addAttachment("2.png",new File("C:\\Users\\ASUS\\Pictures\\Saved Pictures\\2.png"));
+        javaMailSender.send(mimeMessage);
     }
 }

@@ -1,7 +1,12 @@
 package com.example.democache.elk;
 
 import io.searchbox.annotations.JestId;
+import org.springframework.data.elasticsearch.annotations.Document;
 
+/**
+ * @author ASUS
+ */
+@Document(indexName = "es",type = "ar")
 public class Article {
     /**
      * 指定为elasticsearch 的id
