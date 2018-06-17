@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync //开启异步自动配置
 @SpringBootApplication
 @MapperScan(value = "com.example.democache.mapper")
-@EnableCaching//自动配置缓存
+//@EnableCaching//自动配置缓存
 //EnableRabbit+@RabbitListener 监听消息
 @EnableRabbit //自动配置Rabbit
 //定时任务注解

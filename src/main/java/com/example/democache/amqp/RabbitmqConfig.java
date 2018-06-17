@@ -11,6 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitmqConfig {
 
+    /**
+     * 自定义消息的序列化机制
+     * @return MessageConverter
+     */
     @Bean
     public MessageConverter messageConverter(){
         return new Jackson2JsonMessageConverter();

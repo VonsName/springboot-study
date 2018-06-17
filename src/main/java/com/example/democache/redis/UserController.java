@@ -49,7 +49,7 @@ public class UserController {
     /**
      * Caching 组合注解
      */
-    @GetMapping
+    @GetMapping(value = "/cache")
     @Caching(cacheable = {@Cacheable(value = "name")},
             put = {@CachePut(value = "name")},
             evict = {@CacheEvict(cacheNames = "name")})
